@@ -108,15 +108,21 @@ const Index = () => {
         <div className="text-center space-y-6">
           <h2 className="text-xl font-semibold text-foreground">Please sign in to access your job tracker</h2>
           <Button
-            onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' ,
-  options: {
-    redirectTo: window.location.origin // ensures current domain (Vercel or localhost)
+  onClick={() =>
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo:
+          process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3000'
+            : 'https://tracker-lime-psi.vercel.app/'
+      }
+    })
   }
-                                                         })}
-            className="btn-modern gradient-primary text-white shadow-glow h-12 px-6 rounded-xl"
-          >
-            Sign In with Google
-          </Button>
+  className="btn-modern gradient-primary text-white shadow-glow h-12 px-6 rounded-xl"
+>
+  Sign In with Google
+</Button>
         </div>
       </div>
     );
