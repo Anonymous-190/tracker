@@ -29,7 +29,7 @@ const Index = () => {
 
   useEffect(() => {
     const handleAuthRedirect = async () => {
-      const { error } = await supabase.auth.getSessionFromUrl();
+      const { error } = await supabase.auth.exchangeCodeForSession();
       if (error) {
         console.error("Error processing login redirect:", error.message);
       }
