@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Edit,
   Trash2,
@@ -14,7 +14,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Company } from '../pages/Index';
 import { supabase } from '@/lib/supabaseClient';
-import { useUser } from '@clerk/clerk-react';
 
 interface CompanyCardProps {
   company: Company;
@@ -23,7 +22,7 @@ interface CompanyCardProps {
 }
 
 const CompanyCard: React.FC<CompanyCardProps> = ({ company, onUpdate, onDelete }) => {
-  const { user } = useUser();
+  const [userId, setUserId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     name: company.name,
@@ -33,14 +32,23 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onUpdate, onDelete }
     status: company.status || 'applied'
   });
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) setUserId(data.user.id);
+      else console.error('Failed to get user', error);
+    };
+    fetchUser();
+  }, []);
+
   const handleSave = async () => {
-    if (!user) return;
+    if (!userId) return;
 
     const { error } = await supabase
       .from('companies')
       .update(editData)
       .eq('id', company.id)
-      .eq('user_id', user.id); // Extra protection
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Update failed:', error);
@@ -51,13 +59,13 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onUpdate, onDelete }
   };
 
   const handleDelete = async () => {
-    if (!user) return;
+    if (!userId) return;
 
     const { error } = await supabase
       .from('companies')
       .delete()
       .eq('id', company.id)
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Delete failed:', error);

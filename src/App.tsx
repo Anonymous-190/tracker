@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -5,9 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
-import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import SignIn from "./pages/SignIn"; // Add this route explicitly if you're using custom sign in
 
 const queryClient = new QueryClient();
 
@@ -28,19 +29,8 @@ const App = () => (
 
           <BrowserRouter>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <>
-                    <SignedIn>
-                      <Index />
-                    </SignedIn>
-                    <SignedOut>
-                      <RedirectToSignIn />
-                    </SignedOut>
-                  </>
-                }
-              />
+              <Route path="/" element={<Index />} />
+              <Route path="/signin" element={<SignIn />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

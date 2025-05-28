@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, X, Building2, Globe, User, Briefcase } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@clerk/clerk-react";
-import { supabase } from "@/lib/supabaseClient.ts"; // Make sure this client adds Clerk JWT in headers
-
+import { supabase } from "@/lib/supabaseClient";
 
 interface AddCompanyFormProps {
   onCancel: () => void;
-  onSuccess?: () => void; // Optional: refresh company list after add
+  onSuccess?: () => void;
 }
 
 const AddCompanyForm: React.FC<AddCompanyFormProps> = ({ onCancel, onSuccess }) => {
-  const { user } = useUser();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     website: '',
@@ -23,15 +23,22 @@ const AddCompanyForm: React.FC<AddCompanyFormProps> = ({ onCancel, onSuccess }) 
     status: 'applied',
   });
 
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) setUserId(data.user.id);
+      else console.error("User not logged in:", error);
+    };
+    fetchUser();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !formData.name.trim()) return;
+    if (!userId || !formData.name.trim()) return;
 
     setLoading(true);
     const { error } = await supabase.from("companies").insert({
-      user_id: user.id,
+      user_id: userId,
       name: formData.name,
       website: formData.website,
       role: formData.role,
@@ -73,7 +80,6 @@ const AddCompanyForm: React.FC<AddCompanyFormProps> = ({ onCancel, onSuccess }) 
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Fields (same as before)... */}
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Building2 className="w-4 h-4 text-primary" />
