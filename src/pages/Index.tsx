@@ -28,13 +28,6 @@ const Index = () => {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    const handleAuthRedirect = async () => {
-      const { error } = await supabase.auth.exchangeCodeForSession();
-      if (error) {
-        console.error("Error processing login redirect:", error.message);
-      }
-    };
-
     const getSessionAndStoreUser = async () => {
       const { data } = await supabase.auth.getSession();
       const user = data?.session?.user;
@@ -71,7 +64,7 @@ const Index = () => {
       setUserId(user?.id ?? null);
     });
 
-    handleAuthRedirect().then(getSessionAndStoreUser);
+    getSessionAndStoreUser();
 
     return () => {
       listener?.subscription.unsubscribe();
